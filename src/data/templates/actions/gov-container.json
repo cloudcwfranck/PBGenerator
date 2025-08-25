@@ -1,0 +1,15 @@
+{
+  "name": "Gov Container Build",
+  "on": { "push": { "branches": ["main"] }, "pull_request": {} },
+  "jobs": {
+    "build": {
+      "runs-on": "ubuntu-latest",
+      "permissions": { "contents": "read", "security-events": "write", "id-token": "write" },
+      "steps": [
+        { "uses": "actions/checkout@v4" },
+        { "name": "Setup Node", "uses": "actions/setup-node@v4", "with": {"node-version": "20"} },
+        { "name": "Build image", "run": "docker build -t $IMAGE_NAME:$GITHUB_SHA ." }
+      ]
+    }
+  }
+}

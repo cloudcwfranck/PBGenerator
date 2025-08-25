@@ -1,0 +1,18 @@
+{
+  "steps": [
+    {
+      "name": "Trivy scan",
+      "uses": "aquasecurity/trivy-action@0.24.0",
+      "with": {
+        "image-ref": "$IMAGE_NAME:$GITHUB_SHA",
+        "format": "sarif",
+        "output": "trivy.sarif"
+      }
+    },
+    {
+      "name": "Upload SARIF",
+      "uses": "github/codeql-action/upload-sarif@v3",
+      "with": { "sarif_file": "trivy.sarif" }
+    }
+  ]
+}

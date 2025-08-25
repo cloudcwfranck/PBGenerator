@@ -1,0 +1,8 @@
+{
+  "steps": [
+    { "name": "OPA policy gate", "run": "conftest test opa_policies/ --all-namespaces" }
+  ],
+  "files": [
+    { "path": "opa_policies/policy.rego", "content": "package main\nallow { input.reviewed }" }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "steps": [
+    { "name": "tfsec", "uses": "aquasecurity/tfsec-pr-commenter-action@v1.3.1" }
+  ],
+  "files": [
+    { "path": "tfsec.json", "content": "{}" }
+  ]
+}
