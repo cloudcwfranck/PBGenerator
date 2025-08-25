@@ -1,0 +1,5 @@
+{
+  "steps": [
+    { "name": "Generate SBOM", "run": "syft . -o spdx-json > sbom.spdx.json" }
+  ]
+}

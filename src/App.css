@@ -1,0 +1,29 @@
+#root {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.controls label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.controls select {
+  margin-left: 0.5rem;
+}
+
+fieldset label {
+  display: block;
+}
+
+.actions {
+  margin: 1rem 0;
+}
+
+.preview {
+  background: #f0f0f0;
+  padding: 1rem;
+  overflow-x: auto;
+}
