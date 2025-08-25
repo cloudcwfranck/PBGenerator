@@ -4,22 +4,23 @@ export interface AddonFile {
 }
 
 export interface Addon {
-  steps?: unknown[];
+  steps?: Record<string, unknown>[];
   permissions?: Record<string, string>;
   files?: AddonFile[];
 }
 
 interface Job {
   permissions?: Record<string, string>;
-  steps?: unknown[];
+  steps?: Record<string, unknown>[];
 }
 
 export interface Template {
+  name?: string;
+  on?: unknown;
   jobs?: {
     build?: Job;
-    [key: string]: unknown;
+    [key: string]: Job | undefined;
   };
-  steps?: unknown[];
   [key: string]: unknown;
 }
 
@@ -28,35 +29,53 @@ export interface MergeResult {
   files: AddonFile[];
 }
 
+function stepKey(step: Record<string, unknown>): string {
+  if ('name' in step && typeof step.name === 'string') return step.name;
+  if ('uses' in step && typeof step.uses === 'string')
+    return `${step.uses}-${JSON.stringify((step as { with?: unknown }).with || {})}`;
+  if ('run' in step && typeof step.run === 'string') return step.run;
+  return JSON.stringify(step);
+}
+
+function privilegeRank(v: string): number {
+  return v === 'write' ? 2 : v === 'read' ? 1 : 0;
+}
+
+function mergePermissions(
+  base: Record<string, string> = {},
+  extra: Record<string, string> = {},
+): Record<string, string> {
+  const out = { ...base };
+  for (const [k, v] of Object.entries(extra)) {
+    const existing = out[k];
+    if (!existing || privilegeRank(v) > privilegeRank(existing)) {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
 export function merge(base: Template, addons: Addon[]): MergeResult {
   const result: Template = structuredClone(base);
-  const extraFiles: AddonFile[] = [];
+  const files: AddonFile[] = [];
+  const job = result.jobs?.build;
+  if (job && !job.steps) job.steps = [];
 
   for (const addon of addons) {
-    const buildJob = result.jobs?.build;
-    if (addon.permissions && buildJob?.permissions) {
-      buildJob.permissions = {
-        ...buildJob.permissions,
-        ...addon.permissions,
-      };
+    if (addon.permissions && job) {
+      job.permissions = mergePermissions(job.permissions, addon.permissions);
     }
-
-    const targetSteps = buildJob?.steps || result.steps;
+    const targetSteps = job?.steps;
     if (targetSteps && addon.steps) {
       for (const step of addon.steps) {
-        const exists = targetSteps.some(
-          (s) => JSON.stringify(s) === JSON.stringify(step)
-        );
-        if (!exists) {
+        const key = stepKey(step);
+        if (!targetSteps.some((s) => stepKey(s) === key)) {
           targetSteps.push(step);
         }
       }
     }
-
-    if (addon.files) {
-      extraFiles.push(...addon.files);
-    }
+    if (addon.files) files.push(...addon.files);
   }
 
-  return { template: result, files: extraFiles };
+  return { template: result, files };
 }
