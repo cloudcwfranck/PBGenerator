@@ -1,29 +1,64 @@
-#root {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1rem;
-  font-family: Arial, sans-serif;
+.container {
+  width: 100%;
+  max-width: 1200px;
 }
 
-.controls label {
-  display: block;
-  margin-bottom: 0.5rem;
+header {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.controls select {
-  margin-left: 0.5rem;
+header h1 {
+  font-size: 3rem;
+  margin: 0;
+  background: linear-gradient(90deg, #646cff, #9da8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+header p {
+  margin-top: 0.5rem;
+  color: #ccc;
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.controls,
+.output {
+  flex: 1 1 300px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+
+.controls label,
 fieldset label {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
 }
 
 .actions {
-  margin: 1rem 0;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .preview {
-  background: #f0f0f0;
+  background: #111;
   padding: 1rem;
+  border-radius: 4px;
   overflow-x: auto;
 }

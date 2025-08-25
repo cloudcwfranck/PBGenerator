@@ -10,12 +10,15 @@ import opa from './data/addons/opa.json';
 import tfsec from './data/addons/iac-tfsec.json';
 import trivy from './data/addons/trivy.json';
 import { merge } from './lib/merge';
-import type { Addon, MergeResult } from './lib/merge';
+import type { Addon, MergeResult, Template } from './lib/merge';
 import { toYaml } from './lib/yaml';
 
 const addonMap: Record<string, Addon> = { sast, sbom, opa, tfsec, trivy };
 
-const baseTemplates = {
+const baseTemplates: Record<
+  string,
+  Record<string, Record<string, unknown>>
+> = {
   actions: {
     app: { commercial: commercialNode, government: commercialNode },
     container: { commercial: commercialNode, government: govContainer },
@@ -40,7 +43,8 @@ function App() {
   };
 
   const selectedTemplate =
-    (baseTemplates as any)[system]?.[repoType]?.[practice] || commercialNode;
+    (baseTemplates[system]?.[repoType]?.[practice] as Template) ||
+    commercialNode;
   const selectedAddons = extras.map((e) => addonMap[e]);
   const result: MergeResult = merge(selectedTemplate, selectedAddons);
   const yaml = toYaml(result.template);
@@ -67,64 +71,78 @@ function App() {
 
   return (
     <div className="container">
-      <h1>Pipeline Blueprint Generator</h1>
-      <div className="controls">
-        <label>
-          Cloud
-          <select value={provider} onChange={(e) => setProvider(e.target.value)}>
-            <option value="aws">AWS</option>
-            <option value="azure">Azure</option>
-            <option value="gcp">GCP</option>
-          </select>
-        </label>
-        <label>
-          Repo type
-          <select
-            value={repoType}
-            onChange={(e) => setRepoType(e.target.value as any)}
-          >
-            <option value="app">App</option>
-            <option value="container">Container</option>
-            <option value="iac">IaC</option>
-          </select>
-        </label>
-        <label>
-          Practice
-          <select
-            value={practice}
-            onChange={(e) => setPractice(e.target.value as any)}
-          >
-            <option value="commercial">Commercial</option>
-            <option value="government">Government</option>
-          </select>
-        </label>
-        <fieldset>
-          <legend>Extras</legend>
-          {Object.keys(addonMap).map((key) => (
-            <label key={key}>
-              <input
-                type="checkbox"
-                checked={extras.includes(key)}
-                onChange={() => toggleExtra(key)}
-              />
-              {key}
-            </label>
-          ))}
-        </fieldset>
-        <label>
-          <input
-            type="checkbox"
-            checked={system === 'azdo'}
-            onChange={(e) => setSystem(e.target.checked ? 'azdo' : 'actions')}
-          />
-          Azure DevOps
-        </label>
-      </div>
-      <div className="actions">
-        <button onClick={copy}>Copy to clipboard</button>
-        <button onClick={download}>Download as zip</button>
-      </div>
-      <pre className="preview">{yaml}</pre>
+      <header>
+        <h1>Pipeline Blueprint Generator</h1>
+        <p>Instant CI/CD pipeline templates tailored to your project.</p>
+      </header>
+      <main className="layout">
+        <section className="controls">
+          <label>
+            Cloud
+            <select
+              value={provider}
+              onChange={(e) => setProvider(e.target.value)}
+            >
+              <option value="aws">AWS</option>
+              <option value="azure">Azure</option>
+              <option value="gcp">GCP</option>
+            </select>
+          </label>
+          <label>
+            Repo type
+            <select
+              value={repoType}
+              onChange={(e) =>
+                setRepoType(e.target.value as 'app' | 'container' | 'iac')
+              }
+            >
+              <option value="app">App</option>
+              <option value="container">Container</option>
+              <option value="iac">IaC</option>
+            </select>
+          </label>
+          <label>
+            Practice
+            <select
+              value={practice}
+              onChange={(e) =>
+                setPractice(e.target.value as 'commercial' | 'government')
+              }
+            >
+              <option value="commercial">Commercial</option>
+              <option value="government">Government</option>
+            </select>
+          </label>
+          <fieldset>
+            <legend>Extras</legend>
+            {Object.keys(addonMap).map((key) => (
+              <label key={key}>
+                <input
+                  type="checkbox"
+                  checked={extras.includes(key)}
+                  onChange={() => toggleExtra(key)}
+                />
+                {key}
+              </label>
+            ))}
+          </fieldset>
+          <label>
+            <input
+              type="checkbox"
+              checked={system === 'azdo'}
+              onChange={(e) => setSystem(e.target.checked ? 'azdo' : 'actions')}
+            />
+            Azure DevOps
+          </label>
+        </section>
+        <section className="output">
+          <div className="actions">
+            <button onClick={copy}>Copy to clipboard</button>
+            <button onClick={download}>Download as zip</button>
+          </div>
+          <pre className="preview">{yaml}</pre>
+        </section>
+      </main>
     </div>
   );
 }
