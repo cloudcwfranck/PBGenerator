@@ -1,0 +1,9 @@
+{
+  "steps": [
+    {
+      "name": "Generate provenance",
+      "uses": "actions/slsa-framework/slsa-generator@v2",
+      "with": { "base64-subject" : "${{ github.sha }}" }
+    }
+  ]
+}
